@@ -6,7 +6,7 @@ const getProductsBd = async (req, res) => {
   const {limit,page,...query} = req.query;
        const products = await Products.getProduct( page, limit, query);
        if (products){
-          res.json(products)      
+          res.json({status:"succes",payload:products})      
        }else{
         res.json(products)  
 
