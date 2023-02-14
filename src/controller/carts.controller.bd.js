@@ -106,7 +106,38 @@ const deleteProductToCart = async (req, res) => {
     return res.status(200).json({ msg: 'Producto eliminado del carrito', cart: cartToUpdate });
   }
 };
+const cartUpdate = async (req,res)=>{
+  const {cid, list_of_products} = req.params;
+  const Cart = await Carts.getCartsId(cid)
 
+  list_of_products.array.array.forEach(pid => {
+    product = Cart.product.find((prod)=>prod.id == pid) 
+    if(product)
+    {
+      product = pid
+    } else {
+      Cart.addProductToCart(pid)
+    }
+  });
+}
+const deleteToCart = async (req,res)=>{
+  const {cid} = req.params;
+  const Cart = await BdCartManager.getCartsId(cid);
+  if  (!Cart) {
+    return  res.status ( 400 ) . json ( {
+    msj : "Carrito Inexistente" ,
+  } )  
+  }
+  
+    cart_products=[ ];
+    cart_cantidadTotal =  0;
+    cart_totalPrice =  0;
+    const  cartToUpdate  =  await BdCartManager.updateToCart ( Cart )
+    return  res.status ( 201 ) . json ( {
+      msj : "Carrito Vaciado" ,
+      Carrito : cartToUpdate
+    } )  
+  }
 
 
 //     const cartToUpdate = await Cart.updateProductToCart(cart);
@@ -124,4 +155,6 @@ module.exports = {
   bdgetCartId,
   addProductToCart,
   deleteProductToCart,
+  cartUpdate,
+  deleteToCart
 };
