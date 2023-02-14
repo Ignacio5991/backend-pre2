@@ -1,5 +1,5 @@
 const cartsModel = require('../models/carts.model')
-const productModel = require('../models/products.model')
+// const productModel = require('../models/products.model')
 
 class BdCartsManager {
     constructor() {
@@ -18,23 +18,23 @@ class BdCartsManager {
     }
 
 
-    getCartByUsername = async (username) => {
-        try {
-            const cart = await cartsModel.findOne({username:'1'})
-            return cart
-        } catch (error) {
-            return { msg: 'Error al mostrar carrito'}
-        }
-    } 
+    // getCartByUsername = async (username) => {
+    //     try {
+    //         const cart = await cartsModel.findOne({username:'1'})
+    //         return cart
+    //     } catch (error) {
+    //         return { msg: 'Error al mostrar carrito'}
+    //     }
+    // } 
 
-    getCartsId = async (id, query={}) => {
+    getCartsId = async (id) => {
         try {
-            const cart = await cartsModel.find({_id:id,...query});
+            const cart = await cartsModel.findById(id);
             return cart
         } catch (error) {
-            return { msg: "Error Al Mostrar Carrito" }
+            return undefined;
         }
-    }
+    };
 
     getCarts = async () => {
         try {
@@ -54,14 +54,11 @@ class BdCartsManager {
         }else {
 
         }
-    }
+    };
     
     updateCartProducts = async (cart) => {
-        const cartUpdated = await Carts.findOneAndUpdate({username: cart.username}, cart,{
-            new: true
-         });
-        return cartUpdated
-    } 
+        const cartUpdated = await cartsModel.findByIdAndUpdate(cart.id, cart,{new: true,});
+        return cartUpdated;
+    };
 }
-
 module.exports = BdCartsManager 

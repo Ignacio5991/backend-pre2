@@ -1,20 +1,18 @@
 const BdProductManager = require("../dao/mongoManager/BdProductManager");
-const Products = new BdProductManager();
+// const Products = new BdProductManager();
 
 
 const getProductsBd = async (req, res) => {
-  const {limit,page,...query} = req.query;
-       const products = await Products.getProduct( page, limit, query);
+  const {limit,page,sort,...query} = req.query;
+       const products = await Products.getProduct( page, limit, sort, query);
+       const {docs} = products;
+       const state =  products ? "success" : "error";
        if (products){
-          res.json({status:"succes",payload:products})      
+          res.json({...products, status:state, payload:docs})      
        }else{
-        res.json(products)  
-
+        res.json(products)
        }
-
-     
 };
-
 const addProductBd = async (req, res)=>{
   const product = req.body;
     const newproduct = await Products.addProduct(product);

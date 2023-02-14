@@ -11,5 +11,4 @@ router.delete('/realtimeproducts/:pid', viewControllers.deleteRealTimeProduct)
 router.post('/realtimeproducts/', viewControllers.addRealTimeProduct)
 router.get('/chats', viewControllers.renderChats)
 
-
 module.exports = router;

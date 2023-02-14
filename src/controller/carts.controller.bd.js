@@ -1,6 +1,11 @@
-const BdProductManager = require('../dao/mongoManager/BdProductManager');
-const Products = new BdProductManager();
-const BdCartManager = require('../dao/mongoManager/BdCartManager');
+// const BdProductManager = require('../dao/mongoManager/BdProductManager');
+// const Products = new BdProductManager();
+// const BdCartManager = require('../dao/mongoManager/BdCartManager');
+// const Carts = new BdCartManager();
+
+const Products = require("../dao/mongoManager/BdProductManager");
+const BdCartManager = require("../dao/mongoManager/BdCartManager");
+const { find } = require("../dao/models/products.model");
 const Carts = new BdCartManager();
 
 const createCarts = async (req, res) => {
@@ -43,13 +48,13 @@ const addProductToCart = async (req, res) => {
     });
   }
 
-  const cart = Carts.getCartByUsername(cid);
+  const cart = await Carts.getCartId(cid);
 
   if (!cart) {
     const newCart = {
       priceTotal: product.price,
       quantityTotal: 1,
-      products: [product],
+      products: [{ id: product.id, title: product.title, description: product.description, price: product.price, quantity: 1 }],
       username: cid,
     };
 
@@ -60,55 +65,58 @@ const addProductToCart = async (req, res) => {
       cart: cartToSave,
     });
   }
-  //   const findProduct = cart.products.find((product) =>
-  // product.id
-  //  === pid)
+  const findProduct = cart.products.find((product) => product.id === pid);
 
   if (!findProduct) {
-    cart.products.push(product);
+    cart.products.push({id:product.id, title: product.title, description: product.description,price:product.price, quantity: 1});
     cart.quantity = cart.quantity + 1;
-    cart.priceTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + ProductoActual.quantity, 0);
+    // cart.priceTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + ProductoActual.quantity, 0);
 
     const cartToUpdate = await Cart.updateProductToCart(cart);
 
     return res.status(201).json({
-      msg: 'Producto agregado al carrito',
+      msg: 'Producto agregado al carrito: ${cid}',
       cart: cartToUpdate,
     });
   }
 };
+
 const deleteProductToCart = async (req, res) => {
   const { cid, pid } = req.params;
+  const Cart = await Carts.getCartsId(cid);
+  
+  const findProductcart = Carts.products.find((prod)=>prod.id === pid); 
 
-  const cart = Carts.getCartByUsername(cid);
-
-  if (!cart) {
-    const newCart = {
-      priceTotal: product.price,
-      quantityTotal: 1,
-      products: [product],
-      username: cid,
-    };
-
-
-  }
-
-
-  if (!findProduct) {
-    cart.products.push(product);
-    cart.quantity = cart.quantity + 1;
-    cart.priceTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + ProductoActual.quantity, 0);
-
-    const cartToUpdate = await Cart.updateProductToCart(cart);
-
-    return res.status(201).json({
-      msg: 'Producto agregado al carrito',
-      cart: cartToUpdate,
+  if (!findProductcart) {
+    return res.status(400).json({
+      msg: `El producto con el id:${pid} no existe`,
+      ok: false,
     });
+  } else {
+    if (findProductTocart.quantity === 1) {
+      const index = Cart.products.findIndex((prod) => prod.id === pid);
+      Cart.products.splice(index, 1);
+    } else {
+      findProductTocart.quantity--;
+    }
+    Cart.quantityTotal = Cart.quantityTotal - 1;
+    const total = Cart.products.reduce((acumulador, total) => acumulador + total.price * total.quantity, 0);
+    Cart.priceTotal = total;
+    const cartToUpdate = await Carts.updateToCart(Cart);
+    return res.status(200).json({ msg: 'Producto eliminado del carrito', cart: cartToUpdate });
   }
 };
 
 
+
+//     const cartToUpdate = await Cart.updateProductToCart(cart);
+
+//     return res.status(201).json({
+//       msg: 'Producto agregado al carrito',
+//       cart: cartToUpdate,
+//     });
+//   }
+// };
 
 module.exports = {
   createCarts,
