@@ -1,7 +1,7 @@
 const BdProductManager = require('../dao/mongoManager/BdProductManager');
-const BdCartManager = require("../dao/mongoManager/BdCartManager");
+const BdCartManager = require('../dao/mongoManager/BdCartManager');
 const Carts = new BdCartManager();
-const { find } = require("../dao/models/products.model");
+const { find } = require('../dao/models/products.model');
 
 const createCarts = async (req, res) => {
   const cart = req.body;
@@ -49,7 +49,7 @@ const addProductToCart = async (req, res) => {
     const newCart = {
       priceTotal: product.price,
       quantityTotal: 1,
-      products: [{ id: product.id,quantity:1}],
+      products: [{ id: product.id }],
       username: cid,
     };
 
@@ -63,27 +63,26 @@ const addProductToCart = async (req, res) => {
   const findProduct = cart.products.find((product) => product.id === pid);
 
   if (!findProduct) {
-    cart.products.push({id:product.id});
-    cart.priceTotal = cart.priceTotal + product.price
-    
-  } else { 
-    findProduct.quantity ++
-    cart.priceTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + (product.price*ProductoActual.quantity), 0);
+    cart.products.push({ id: product.id });
+    cart.priceTotal = cart.priceTotal + product.price;
+  } else {
+    findProduct.quantity++;
+    cart.priceTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + product.price * ProductoActual.quantity, 0);
   }
-    cart.quantityTotal = cart.quantityTotal + 1;
-    const cartToUpdate = await Carts.updateCartProducts(cart);
+  cart.quantityTotal = cart.quantityTotal + 1;
+  const cartToUpdate = await Carts.updateCartProducts(cart);
 
-    return res.status(201).json({
-      msg: 'Producto agregado al carrito: ${cid}',
-      cart: cartToUpdate,
-    });
+  return res.status(201).json({
+    msg: 'Producto agregado al carrito: ${cid}',
+    cart: cartToUpdate,
+  });
 };
 
 const deleteProductToCart = async (req, res) => {
   const { cid, pid } = req.params;
   const Cart = await Carts.getCartsId(cid);
   JSON.stringify(Cart);
-  const findProductcart = Cart.products.find((prod)=>prod.id === pid); 
+  const findProductcart = Cart.products.find((prod) => prod.id === pid);
 
   if (!findProductcart) {
     return res.status(400).json({
@@ -98,47 +97,78 @@ const deleteProductToCart = async (req, res) => {
     }
     const product = await BdProductManager.getProductId(pid);
     Cart.quantityTotal = Cart.quantityTotal - 1;
-    const total = Cart.products.reduce((acumulador, total) => acumulador + (product.price*total.quantity), 0);
+    const total = Cart.products.reduce((acumulador, total) => acumulador + product.price * total.quantity, 0);
     Cart.priceTotal = total;
     const cartToUpdate = await Carts.updateCartProducts(Cart);
     return res.status(200).json({ msg: 'Producto eliminado del carrito', cart: cartToUpdate });
   }
 };
-const cartUpdate = async (req,res)=>{
-  const {cid, list_of_products} = req.params;
-  const Cart = await Carts.getCartsId(cid)
+const updateQuantityProduct = async (req, res) => {
+  const { cid, pid } = req.params;
+  const { quantity: quantity } = req.body;
+  const cart = await Carts.getCartsId(cid);
 
-  list_of_products.array.array.forEach(pid => {
-    product = Cart.product.find((prod)=>prod.id == pid) 
-    if(product)
-    {
-      product = pid
+  if (!cart) {
+    return res.status(200).json({
+      msg: 'Carrito no encontrado',
+    });
+  }
+  const findProductcart = Carts.products.find((prod) => prod.id === pid);
+
+  if (!findProductcart) {
+    return res.status(400).json({
+      msg: `El producto con el id:${pid} no existe`,
+      ok: false,
+    });
+  }
+    if (quantity == undefined) {
+      return res.status(400).json({
+        msg: `Debe agregar cantidad a actualizar`,
+      });
     } else {
-      Cart.addProductToCart(pid)
+      if (quantity < 0) {
+        return res.status(400).json({
+          msg: `La cantidad debe ser mayor o igual a 0`,
+        });
+      } else {
+        findProductcart.quantity = quantity;
+      }
+    }
+    Carts.quantityTotal = Carts.quantityTotal - quantity
+  }
+
+
+const cartUpdate = async (req, res) => {
+  const { cid, list_of_products } = req.params;
+  const Cart = await Carts.getCartsId(cid);
+
+  list_of_products.array.array.forEach((pid) => {
+    product = Cart.product.find((prod) => prod.id == pid);
+    if (product) {
+      product = pid;
+    } else {
+      Cart.addProductToCart(pid);
     }
   });
-}
-const deleteToCart = async (req,res)=>{
-  const {cid} = req.params;
-  const Cart = await BdCartManager.getCartsId(cid);
-  if  (!Cart) {
-    return  res.status ( 400 ) . json ( {
-    msj : "Carrito Inexistente" ,
-  } )  
+};
+const deleteToCart = async (req, res) => {
+  const { cid } = req.params;
+  console.log(cid);
+  const Cart = await Carts.getCartsId(cid);
+  if (!Cart) {
+    return res.status(400).json({
+      msj: 'Carrito Inexistente',
+    });
   }
-  
-    cart_products=[ ];
-    cart_cantidadTotal =  0;
-    cart_totalPrice =  0;
-    const  cartToUpdate  =  await BdCartManager.updateToCart ( Cart )
-    return  res.status ( 201 ) . json ( {
-      msj : "Carrito Vaciado" ,
-      Carrito : cartToUpdate
-    } )  
-  }
-
-
-
+  Cart.products = [];
+  Cart.cantidadTotal = 0;
+  Cart.totalPrice = 0;
+  const cartToUpdate = await Carts.updateCartProducts(Cart);
+  return res.status(201).json({
+    msj: 'Carrito Vaciado',
+    Carrito: cartToUpdate,
+  });
+};
 
 module.exports = {
   createCarts,
@@ -146,6 +176,7 @@ module.exports = {
   bdgetCartId,
   addProductToCart,
   deleteProductToCart,
+  updateQuantityProduct,
   cartUpdate,
-  deleteToCart
+  deleteToCart,
 };
