@@ -1,5 +1,4 @@
 const BdProductManager = require('../dao/mongoManager/BdProductManager');
-const Products = new BdProductManager();
 const BdCartManager = require("../dao/mongoManager/BdCartManager");
 const Carts = new BdCartManager();
 const { find } = require("../dao/models/products.model");
@@ -35,7 +34,7 @@ const bdgetCart = async (req, res) => {
 
 const addProductToCart = async (req, res) => {
   const { cid, pid } = req.params;
-  const product = await Products.getProductId(pid);
+  const product = await BdProductManager.getProductId(pid);
 
   if (!product) {
     return res.status(400).json({
@@ -97,7 +96,7 @@ const deleteProductToCart = async (req, res) => {
     } else {
       findProductcart.quantity--;
     }
-    const product = await Products.getProductId(pid);
+    const product = await BdProductManager.getProductId(pid);
     Cart.quantityTotal = Cart.quantityTotal - 1;
     const total = Cart.products.reduce((acumulador, total) => acumulador + (product.price*total.quantity), 0);
     Cart.priceTotal = total;
@@ -139,14 +138,7 @@ const deleteToCart = async (req,res)=>{
   }
 
 
-//     const cartToUpdate = await Cart.updateProductToCart(cart);
 
-//     return res.status(201).json({
-//       msg: 'Producto agregado al carrito',
-//       cart: cartToUpdate,
-//     });
-//   }
-// };
 
 module.exports = {
   createCarts,

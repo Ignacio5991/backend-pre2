@@ -52,4 +52,4 @@ class BdProductManager {
   };
 }
 
-module.exports = BdProductManager;
+module.exports = new BdProductManager();

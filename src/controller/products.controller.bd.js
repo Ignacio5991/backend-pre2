@@ -1,10 +1,10 @@
 const BdProductManager = require("../dao/mongoManager/BdProductManager");
-// const Products = new BdProductManager();
+
 
 
 const getProductsBd = async (req, res) => {
   const {limit,page,sort,...query} = req.query;
-       const products = await Products.getProduct( page, limit, sort, query);
+       const products = await BdProductManager.getProduct( page, limit, sort, query);
        const {docs} = products;
        const state =  products ? "success" : "error";
        if (products){
@@ -15,7 +15,7 @@ const getProductsBd = async (req, res) => {
 };
 const addProductBd = async (req, res)=>{
   const product = req.body;
-    const newproduct = await Products.addProduct(product);
+    const newproduct = await BdProductManager.addProduct(product);
     if (newproduct){
       res.json(newproduct)    
     }else{
@@ -27,7 +27,7 @@ const addProductBd = async (req, res)=>{
 
 const getProductIdBd = async (req, res)=>{
   const id = req.params.pid 
-  const getProductId = await Products.getProductId(id);
+  const getProductId = await BdProductManager.getProductId(id);
   if (getProductId){
     res.json(getProductId)      
   }else{
@@ -41,7 +41,7 @@ const getProductIdBd = async (req, res)=>{
 const UpdateProductBd = async (req, res)=>{
   const id = req.params.pid 
   const product = req.body
-  const UpdateProductId = await Products.UpdateProduct(id, product);
+  const UpdateProductId = await BdProductManager.UpdateProduct(id, product);
   if (UpdateProductId){
      res.json(UpdateProductId)      
   }else{
@@ -53,7 +53,7 @@ const UpdateProductBd = async (req, res)=>{
 
 const deleteProductBd = async (req, res)=>{
   const id = req.params.pid 
-    const deleteproduct = await Products.DeleteProductId(id);
+    const deleteproduct = await BdProductManager.DeleteProductId(id);
     if (deleteproduct){
       res.json(deleteproduct)      
     }else{

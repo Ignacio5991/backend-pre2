@@ -40,29 +40,13 @@ server.use("/api/cartsBd/", cartsRouteBd );
 server.use("/api/chats/", chatsRouter );
 
 
-// mongoose.connect('mongodb+srv://Ignacio:jY6DHRTn6F9uCAmF@admin.mtszt8r.mongodb.net/?retryWrites=true&w=majority',
 
-// (error)=>{
-//    if (error) {
-//      console.log('error de conexion', error);
-//      process.exit();
-//    }else {
-//     console.log('Conexion exitosa');
-//    }
-// });
 
 const test = async ()=>{
   await mongoose.connect('mongodb+srv://Ignacio:jY6DHRTn6F9uCAmF@admin.mtszt8r.mongodb.net/?retryWrites=true&w=majority',
-  // (error)=>{
-  //   if (error) {
-  //     console.log('error de conexion', error);
-  //     process.exit();
-  //   }else {
-  //    console.log('Conexion exitosa');
-  //   }
  );
- const result = await productModel.paginate({"category":"wisky"},{limit:3,page:1});
- console.log(result)
+ console.log("Su conexion a la base fue exitosa")
+
 }
 test();
 connectionSocket (httpServer);
