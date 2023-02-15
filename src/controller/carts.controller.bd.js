@@ -1,12 +1,8 @@
-// const BdProductManager = require('../dao/mongoManager/BdProductManager');
-// const Products = new BdProductManager();
-// const BdCartManager = require('../dao/mongoManager/BdCartManager');
-// const Carts = new BdCartManager();
-
-const Products = require("../dao/mongoManager/BdProductManager");
+const BdProductManager = require('../dao/mongoManager/BdProductManager');
+const Products = new BdProductManager();
 const BdCartManager = require("../dao/mongoManager/BdCartManager");
-const { find } = require("../dao/models/products.model");
 const Carts = new BdCartManager();
+const { find } = require("../dao/models/products.model");
 
 const createCarts = async (req, res) => {
   const cart = req.body;
@@ -48,13 +44,13 @@ const addProductToCart = async (req, res) => {
     });
   }
 
-  const cart = await Carts.getCartId(cid);
+  const cart = await Carts.getCartsId(cid);
 
   if (!cart) {
     const newCart = {
       priceTotal: product.price,
       quantityTotal: 1,
-      products: [{ id: product.id, title: product.title, description: product.description, price: product.price, quantity: 1 }],
+      products: [{ id: product.id,quantity:1}],
       username: cid,
     };
 
@@ -68,24 +64,27 @@ const addProductToCart = async (req, res) => {
   const findProduct = cart.products.find((product) => product.id === pid);
 
   if (!findProduct) {
-    cart.products.push({id:product.id, title: product.title, description: product.description,price:product.price, quantity: 1});
-    cart.quantity = cart.quantity + 1;
-    // cart.priceTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + ProductoActual.quantity, 0);
-
-    const cartToUpdate = await Cart.updateProductToCart(cart);
+    cart.products.push({id:product.id});
+    cart.priceTotal = cart.priceTotal + product.price
+    
+  } else { 
+    findProduct.quantity ++
+    cart.priceTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + (product.price*ProductoActual.quantity), 0);
+  }
+    cart.quantityTotal = cart.quantityTotal + 1;
+    const cartToUpdate = await Carts.updateCartProducts(cart);
 
     return res.status(201).json({
       msg: 'Producto agregado al carrito: ${cid}',
       cart: cartToUpdate,
     });
-  }
 };
 
 const deleteProductToCart = async (req, res) => {
   const { cid, pid } = req.params;
   const Cart = await Carts.getCartsId(cid);
-  
-  const findProductcart = Carts.products.find((prod)=>prod.id === pid); 
+  JSON.stringify(Cart);
+  const findProductcart = Cart.products.find((prod)=>prod.id === pid); 
 
   if (!findProductcart) {
     return res.status(400).json({
@@ -93,16 +92,16 @@ const deleteProductToCart = async (req, res) => {
       ok: false,
     });
   } else {
-    if (findProductTocart.quantity === 1) {
-      const index = Cart.products.findIndex((prod) => prod.id === pid);
-      Cart.products.splice(index, 1);
+    if (findProductcart.quantity === 1) {
+      Cart.products = Cart.products.filter((prod) => prod.id !== pid);
     } else {
-      findProductTocart.quantity--;
+      findProductcart.quantity--;
     }
+    const product = await Products.getProductId(pid);
     Cart.quantityTotal = Cart.quantityTotal - 1;
-    const total = Cart.products.reduce((acumulador, total) => acumulador + total.price * total.quantity, 0);
+    const total = Cart.products.reduce((acumulador, total) => acumulador + (product.price*total.quantity), 0);
     Cart.priceTotal = total;
-    const cartToUpdate = await Carts.updateToCart(Cart);
+    const cartToUpdate = await Carts.updateCartProducts(Cart);
     return res.status(200).json({ msg: 'Producto eliminado del carrito', cart: cartToUpdate });
   }
 };
