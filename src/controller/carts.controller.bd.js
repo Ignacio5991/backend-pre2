@@ -1,11 +1,10 @@
 const BdProductManager = require('../dao/mongoManager/BdProductManager');
 const BdCartManager = require('../dao/mongoManager/BdCartManager');
-const Carts = new BdCartManager();
 const { find } = require('../dao/models/products.model');
 
 const createCarts = async (req, res) => {
   const cart = req.body;
-  const Createcart = await Carts.CreateCarts(cart);
+  const Createcart = await BdCartManager.CreateCarts(cart);
   if (!Createcart.error) {
     res.json(Createcart);
   } else {
@@ -15,7 +14,7 @@ const createCarts = async (req, res) => {
 
 const bdgetCartId = async (req, res) => {
   const id = req.params.cid;
-  const cart = await Carts.getCartsId(id);
+  const cart = await BdCartManager.getCartsId(id);
   if (!cart.error) {
     res.json(cart);
   } else {
@@ -24,7 +23,7 @@ const bdgetCartId = async (req, res) => {
 };
 
 const bdgetCart = async (req, res) => {
-  const cart = await Carts.getCarts();
+  const cart = await BdCartManager.getCarts();
   if (!cart.error) {
     res.json(cart);
   } else {
@@ -43,7 +42,7 @@ const addProductToCart = async (req, res) => {
     });
   }
 
-  const cart = await Carts.getCartsId(cid);
+  const cart = await BdCartManager.getCartsId(cid);
 
   if (!cart) {
     const newCart = {
@@ -53,7 +52,7 @@ const addProductToCart = async (req, res) => {
       username: cid,
     };
 
-    const cartToSave = await Carts.addProductToCarts(newCart);
+    const cartToSave = await BdCartManager.addProductToCarts(newCart);
 
     return res.status(200).json({
       msg: 'Carrito creado con exito',
@@ -70,7 +69,7 @@ const addProductToCart = async (req, res) => {
     cart.priceTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + product.price * ProductoActual.quantity, 0);
   }
   cart.quantityTotal = cart.quantityTotal + 1;
-  const cartToUpdate = await Carts.updateCartProducts(cart);
+  const cartToUpdate = await BdCartManager.updateCartProducts(cart);
 
   return res.status(201).json({
     msg: 'Producto agregado al carrito: ${cid}',
@@ -80,7 +79,7 @@ const addProductToCart = async (req, res) => {
 
 const deleteProductToCart = async (req, res) => {
   const { cid, pid } = req.params;
-  const Cart = await Carts.getCartsId(cid);
+  const Cart = await BdCartManager.getCartsId(cid);
   JSON.stringify(Cart);
   const findProductcart = Cart.products.find((prod) => prod.id === pid);
 
@@ -99,14 +98,14 @@ const deleteProductToCart = async (req, res) => {
     Cart.quantityTotal = Cart.quantityTotal - 1;
     const total = Cart.products.reduce((acumulador, total) => acumulador + product.price * total.quantity, 0);
     Cart.priceTotal = total;
-    const cartToUpdate = await Carts.updateCartProducts(Cart);
+    const cartToUpdate = await BdCartManager.updateCartProducts(Cart);
     return res.status(200).json({ msg: 'Producto eliminado del carrito', cart: cartToUpdate });
   }
 };
 const updateQuantityProduct = async (req, res) => {
   const { cid, pid } = req.params;
   const { quantity: quantity } = req.body;
-  const cart = await Carts.getCartsId(cid);
+  const cart = await BdCartManager.getCartsId(cid);
   const product = await BdProductManager.getProductId(pid);
 
   if (!cart) {
@@ -140,15 +139,16 @@ const updateQuantityProduct = async (req, res) => {
       }
     } 
   }
+  cart.priceTotal = cart.products.reduce((acumulador, total) => acumulador + (total.price * total.quantity), 0)
   cart.quantityTotal = cart.products.reduce((Acomulador, ProductoActual) => Acomulador + ProductoActual.quantity, 0);
-  const cartToUpdate = await Carts.updateCartProducts(cart);
+  const cartToUpdate = await BdCartManager.updateCartProducts(cart);
   return res.status(200).json({ msg: 'Cantidad de producto actualizada', cart: cartToUpdate });
 };
 
 const cartUpdate = async (req, res) => {
   const  {cid}  = req.params;
   const body = req.body;
-  const Cart = await Carts.getCartsId(cid);
+  const Cart = await BdCartManager.getCartsId(cid);
 
   if (!Cart) {
     return res.status(200).json({
@@ -172,7 +172,7 @@ const cartUpdate = async (req, res) => {
   Cart.quantityTotal = body.quantity;
   Cart.priceTotal = product.price*body.quantity;
 
-  const cartToUpdate = await Carts.updateCartProducts(Cart);
+  const cartToUpdate = await BdCartManager.updateCartProducts(Cart);
 
   return res.status(201).json({
     msg: 'Producto agregado al carrito: ${cid}',

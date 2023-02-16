@@ -61,4 +61,4 @@ class BdCartsManager {
         return cartUpdated;
     };
 }
-module.exports = BdCartsManager 
+module.exports =  new BdCartsManager(); 

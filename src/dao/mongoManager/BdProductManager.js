@@ -5,9 +5,9 @@ class BdProductManager {
     this.products = [];
   }
 
-  getProduct = async (page = 1, limit = 13, sort, query={}) => {
+  getProduct = async (page = 1, limit = 6, sort, query={}) => {
     try {
-      const products = await productModel.paginate(query, { page, limit, sort:{price:sort}});
+      const products = await productModel.paginate(query, { page, limit , lean:true, sort:{price:sort}});
       return products;
     } catch (error) {
       return { msg: 'Error al Obtener Productos' };
