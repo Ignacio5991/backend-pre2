@@ -28,6 +28,10 @@ const cartsSchema = new mongoose.Schema({
   },
 });
 
+cartsSchema.pre("findById",function(){
+  this.populate("products.product")
+});
+
 const cartsModel = mongoose.model('carts', cartsSchema);
 
 module.exports = cartsModel;

@@ -18,15 +18,6 @@ class BdCartsManager {
     }
 
 
-    // getCartByUsername = async (username) => {
-    //     try {
-    //         const cart = await cartsModel.findOne({username:'1'})
-    //         return cart
-    //     } catch (error) {
-    //         return { msg: 'Error al mostrar carrito'}
-    //     }
-    // } 
-
     getCartsId = async (id) => {
         try {
             const cart = await cartsModel.findById(id);
@@ -35,6 +26,17 @@ class BdCartsManager {
             return undefined;
         }
     };
+
+    renderCart = async (id) => {
+        try {
+            const cart = await cartsModel.findById(id);
+            return [cart]
+        } catch (error) {
+            return undefined;
+        }
+    };
+
+
 
     getCarts = async () => {
         try {
