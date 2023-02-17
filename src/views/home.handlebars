@@ -15,20 +15,24 @@
           </div>
         </div>
       {{/each}}
-       <div class="d-flex">
+       <div class="d-flex justify-content-center ">
             {{#if hasPrevPage}}
-            <button>Anterior</button>
-            {{else}}
             <button id="prev">Anterior</button>
+            {{else}}
+            <button disabled id="prev">Anterior</button>
             {{/if}}
-            <p>{{page}}</p>
+            <p id="page"> {{page}} </p>
             {{#if hasNextPage}}
-            <button>Siguiente</button>
+            <button disabled id="next">Siguiente</button>
             {{else}}
             <button id="next">Siguiente</button>
             {{/if}}
         </div>
-  </div>
+       
+        <div class="d-flex justify-content-center">
+            {{ page }} / {{ totalPages }}
+        </div>
+    </div>
 </main>
 <script
   src='https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js'

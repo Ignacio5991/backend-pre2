@@ -8,11 +8,7 @@ const views = async (req, res) => {
   res.render('home', { products: view, hasPrevPage: !products.hasPrevPage, hasNextPage: !products.hasNextPage, page: !products.page });
 }
 
-// const viewCart = async (req, res) => {
-//   const carts = await BdCartManager.getCartsId();
-//   const view = carts.docs.map((cart) => ({ priceTotal: cart.priceTotal, quantityTotal: cart.quantityTotal, products: cart.products}));
-//   res.render('carts', {carts: view})
-// }
+
 const viewCart = async (req,res) => {
   const {cid} = req.params
   const cart = await BdCartManager.renderCart(cid);
